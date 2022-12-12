@@ -1,4 +1,10 @@
 # Azure_DP_203
+
+
+## Notes certif DP 203
+
+
+
 + Once a database has been created by a Spark job, you can create tables in it with Spark that use Parquet as the storage format. Table names will be converted to lower case and need to be queried using the lower case name. These tables will immediately become available for querying by any of the Azure Synapse workspace Spark pools. They can also be used from any of the Spark jobs subject to permissions.
 
 + Supprimer efficacement des données par partitions : 
@@ -6,11 +12,189 @@
   + Creer une table vide temporaire
   + mettre les données à supprimer dedans
   + drop la table
-  
+
++ ![image-20221211202806769](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221211202806769.png)
+
+  + Serverless : F1 et F4 
+  + Sinon, F1 F2 F3 et F4 (si pas hidden). To change the default and only read from the root folder, set the attribute `<polybase.recursive.traversal>` to 'false' in the core-site.xml configuration file. This file is located under `<SqlBinRoot>\PolyBase\Hadoop\Conf` with SqlBinRoot the `bin` root of SQL Server. For example, `C:\Program Files\Microsoft SQL Server\MSSQL13.XD14\MSSQL\Binn`.
+
++ Report1: Reads three columns from a file that contains 50 columns. -> Parquet 
+  Report2: Queries a single record based on a timestamp. -> Avro gère le timestamp
+
++ Template recommandé pour vitesse de requête et sécurité : {Region}/{SubjectMatter(s)}/{yyyy}/{mm}/{dd}/{hh}/
+
++ 
+
+  + Fact -Use hash-distribution with clustered columnstore index. Performance improves when two hash tables are joined on the same distribution column. 
+  + Dimension - 
+    + Use replicated for smaller tables. 
+    + If tables are too large to store on each Compute node, use hash-distributed. 
+    + Staging - Use round-robin for the staging table. The load with CTAS is fast. Once the data is in the staging table, use INSERT...SELECT to move the data to production tables.
+  + Voir : https://docs.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/sql-data-warehouse-tables-overview#common-distribution-methods-for-tables
+
++ ![image-20221211205327125](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221211205327125.png)
+
+  + **Hot tier** - An online tier optimized for storing data that is accessed or modified frequently. The hot tier has the highest storage costs, but the lowest access costs.
+  + **Cool tier** - An online tier optimized for storing data that is infrequently accessed or modified. Data in the cool tier should be stored for a minimum of 30 days. The cool tier has lower storage costs and higher access costs compared to the hot tier.
+  + **Archive tier** - An offline tier optimized for storing data that is rarely accessed, and that has flexible latency requirements, on the order of hours. Data in the archive tier should be stored for a minimum of 180 days.
+
++ 
+
+  + DISTRIBUTION = HASH ( distribution_column_name )      
+  + DISTRIBUTION = HASH ( [distribution_column_name [, ...n]] )       
+  + DISTRIBUTION = ROUND_ROBIN -- default for Azure Synapse Analytics      
+  + DISTRIBUTION = REPLICATE -- default for Parallel Data Warehouse
+  + PARTITION ( partition_column_name RANGE [ LEFT | RIGHT ] -- default is LEFT 
+    FOR VALUES ( [ boundary_value [,...n] ] ) )
+
++ SCD : 
+
+  + **Type 0: retain original** : Type 0 dimension attributes never change and are assigned to attributes that have durable values or are described as ‘native’.
+  + **Type 1: overwrite** : This method overwrites old data with new data, and therefore does not track historical data.
+  + **Type 2: add new row** : This method tracks historical data by creating multiple records for a given natural key in dimensional tables with different surrogate keys and/or different version numbers.
+  + **Type 3: add new attribute** : This method tracks changes using separate columns and preserves a limited history.
+  + **Type 4: add history table** : The Type 4 method is usually referred to using “history tables”, where one table holds the current data, and an additional table is used to keep a record of some or all of the changes
+  + **Type 5 : Technology build** : The Type 5 technology builds on the Type 4 mini-dimension by embedding a “current profile” mini-dimension key in the base dimension which is overwritten as a Type 1 attribute.
+  + **Type 6: combined approach** : The type 6 method combines the methods of types 1, 2 and 3 (1 + 2 + 3 = 6). 
+
++ Masques de sécurité : 
+
+  + The Default masking function: Full masking according to the data types of the designated fields
+    + Use a zero value for numeric data types (bigint, bit, decimal, int, money, numeric, smallint, smallmoney, tinyint, float, real).
+    + Use 01-01-1900 for date/time data types (date, datetime2, datetime, datetimeoffset, smalldatetime, time).
+
++ External table : 
+
+  + ```sql
+    -- Create a new external table
+    CREATE EXTERNAL TABLE { database_name.schema_name.table_name | schema_name.table_name | table_name }
+        ( <column_definition> [ ,...n ] )
+        WITH (
+            LOCATION = 'folder_or_filepath',
+            DATA_SOURCE = external_data_source_name,
+            [ FILE_FORMAT = external_file_format_name ]
+            [ , <reject_options> [ ,...n ] ]
+        )
+    [;]
+    ```
+
+  + ALTER statement is not supported on external table, you need to DROP it and CREATE it again
+
+  + Only these Data Definition Language (DDL) statements are allowed on external tables:
+    ✑ CREATE TABLE and DROP TABLE
+    ✑ CREATE STATISTICS and DROP STATISTICS
+    ✑ CREATE VIEW and DROP VIEW
+
++ Azure Storage redundancy
+
+  + **Locally redundant storage (LRS)** : 
+    + copies your data synchronously three times within a single physical location in the primary region. 
+    + ![image-20221212022934442](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221212022934442.png)
+    + 
+  + **Zone-redundant storage (ZRS)** : 
+    + copies your data synchronously across three Azure availability zones in the primary region. For applications requiring high availability, Microsoft recommends using ZRS in the primary region, and also replicating to a secondary region.
+    + ![image-20221212023007385](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221212023007385.png)
+  + **Geo-redundant storage** : 
+    + Geo-redundant storage (GRS) copies your data synchronously three times within a single physical location in the primary region using LRS. It then copies your data asynchronously to a single physical location in a secondary region that is hundreds of miles away from the primary region.
+    + ![image-20221212023204339](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221212023204339.png)
+  + **Geo-zone-redundant storage** : 
+    + Geo-zone-redundant storage (GZRS) combines the high availability provided by redundancy across availability zones with protection from regional outages provided by geo-replication. Data in a GZRS storage account is copied across three [Azure availability zones](https://learn.microsoft.com/en-us/azure/availability-zones/az-overview) in the primary region and is also replicated to a secondary geographic region for protection from regional disasters.
+    + ![image-20221212023355467](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221212023355467.png)
+  + **Summary of redundancy options** : 
+    + ![image-20221212023439797](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221212023439797.png)
+    + ![image-20221212023600412](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221212023600412.png)
+  + **Read Access** : 
+    + If your applications require high availability, then you can configure your storage account for read access to the secondary region. When you enable read access to the secondary region, then your data is always available to be read from the secondary, including in a situation where the primary region becomes unavailable. Read-access geo-redundant storage (RA-GRS) or read-access geo-zone-redundant storage (RA-GZRS) configurations permit read access to the secondary region.
+
++ **Distribution** : 
+
+  + **Hash distributed** : 
+
+    + A hash-distributed table distributes table rows across the Compute nodes by using a deterministic hash function to assign each row to one [distribution](https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/massively-parallel-processing-mpp-architecture#distributions).
+
+    + In dedicated SQL pool this knowledge is used to minimize data movement during queries, which improves query performance.
+
+    + Hash-distributed tables work well for large fact tables in a star schema. They can have very large numbers of rows and still achieve high performance.
+
+    + Consider using a hash-distributed table when:
+
+      + The table size on disk is more than 2 GB.
+      + The table has frequent insert, update, and delete operations.
+
+    + ![image-20221212025537951](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221212025537951.png)
+
+    + Ex. : 
+
+      + ```sql
+        CREATE TABLE [dbo].[FactInternetSales]
+        (   [ProductKey]            int          NOT NULL
+        ,   [OrderDateKey]          int          NOT NULL
+        ,   [CustomerKey]           int          NOT NULL
+        ,   [PromotionKey]          int          NOT NULL
+        ,   [SalesOrderNumber]      nvarchar(20) NOT NULL
+        ,   [OrderQuantity]         smallint     NOT NULL
+        ,   [UnitPrice]             money        NOT NULL
+        ,   [SalesAmount]           money        NOT NULL
+        )
+        WITH
+        (   CLUSTERED COLUMNSTORE INDEX
+        ,  DISTRIBUTION = HASH([ProductKey])
+        );
+        ```
+
+    + Choosing distribution column(s) is an important design decision since the values in the hash column(s) determine how the rows are distributed. The best choice depends on several factors, and usually involves tradeoffs. Once a distribution column or column set is chosen, you cannot change it. If you didn't choose the best column(s) the first time, you can use [CREATE TABLE AS SELECT (CTAS)](https://learn.microsoft.com/en-us/sql/t-sql/statements/create-table-as-select-azure-sql-data-warehouse?toc=/azure/synapse-analytics/sql-data-warehouse/toc.json&bc=/azure/synapse-analytics/sql-data-warehouse/breadcrumb/toc.json&view=azure-sqldw-latest&preserve-view=true) to re-create the table with the desired distribution hash key.
+
+    + **To balance the parallel processing, select a distribution column or set of columns that** : 
+
+      + **Has many unique values**
+      + **Does not have NULLs, or has only a few NULLs.**
+      + **Is not a date column**
+
+    + **To minimize data movement, select a distribution column or set of columns that:** 
+
+      + **Is used in `JOIN`, `GROUP BY`, `DISTINCT`, `OVER`, and `HAVING` clauses.**
+      + **Is *not* used in `WHERE` clauses.**
+      + **Is *not* a date column.**
+
+  + **Round-robin distributed** : 
+
+    + A round-robin distributed table distributes table rows evenly across all distributions. The assignment of rows to distributions is random. Unlike hash-distributed tables, rows with equal values are not guaranteed to be assigned to the same distribution.
+    + As a result, the system sometimes needs to invoke a data movement operation to better organize your data before it can resolve a query. This extra step can slow down your queries. For example, joining a round-robin table usually requires reshuffling the rows, which is a performance hit.
+    + Consider using the round-robin distribution for your table in the following scenarios:
+      + When getting started as a simple starting point since it is the default
+      + If there is no obvious joining key
+      + If there is no good candidate column for hash distributing the table
+      + If the table does not share a common join key with other tables
+      + If the join is less significant than other joins in the query
+      + When the table is a temporary staging table
+
++ **Partitions**
+
+  + **Partition sizing** : 
+    + A successful partitioning scheme usually has tens to hundreds of partitions, not thousands.
+    + When creating partitions on **clustered columnstore** tables, it is important to consider how many rows belong to each partition. For optimal compression and performance of clustered columnstore tables, a minimum of 1 million rows per distribution and partition is needed. 
+
++ **Index**
+
+  + **Clustered columnstore indexes**
+    + By default, dedicated SQL pool creates a clustered columnstore index when no index options are specified on a table. Clustered columnstore tables offer both the highest level of data compression and the best overall query performance. Clustered columnstore tables will generally outperform clustered index or heap tables and are usually the best choice for large tables. For these reasons, clustered columnstore is the best place to start when you are unsure of how to index your table.
+    + There are a few scenarios where clustered columnstore may not be a good option:
+      + Columnstore tables do not support varchar(max), nvarchar(max), and varbinary(max). Consider heap or clustered index instead.
+      + Columnstore tables may be less efficient for transient data. Consider heap and perhaps even temporary tables.
+      + Small tables with less than 60 million rows. Consider heap tables.
+  + **Heap** : 
+    + A heap table can be especially useful for loading transient data, such as a staging table, which is transformed into a final table.
+    + When you are temporarily landing data in dedicated SQL pool, you may find that using a heap table makes the overall process faster. This is because loads to heaps are faster than to index tables and in some cases the subsequent read can be done from cache. If you are loading data only to stage it before running more transformations, loading the table to heap table is much faster than loading the data to a clustered columnstore table. In addition, loading data to a [temporary table](https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/sql-data-warehouse-tables-temporary) loads faster than loading a table to permanent storage. After data loading, you can create indexes in the table for faster query performance.
+    + Cluster columnstore tables begin to achieve optimal compression once there is more than 60 million rows. For small lookup tables, less than 60 million rows, consider using HEAP or clustered index for faster query performance.
+
+
+
+
+
 + **Temps réel** : 
   + Input type = Stream, Function = Geospatial
-+  Optimisation de perf : paralleliser Input et Output
-+  Tumbling windows are a series of fixed-sized, non-overlapping and contiguous time intervals.
-+  Azure Data Factory pipelines can execute SSIS packages. In Azure, the following services and tools will meet the core requirements for pipeline orchestration, control flow, and data movement: Azure Data Factory, Oozie on HDInsight, and SQL Server Integration Services (SSIS).
-+  Data Lake Storage Gen1 provides unlimited storage.
-+  
++ Optimisation de perf : paralleliser Input et Output
++ Tumbling windows are a series of fixed-sized, non-overlapping and contiguous time intervals.
++ Azure Data Factory pipelines can execute SSIS packages. In Azure, the following services and tools will meet the core requirements for pipeline orchestration, control flow, and data movement: Azure Data Factory, Oozie on HDInsight, and SQL Server Integration Services (SSIS).
++ Data Lake Storage Gen1 provides unlimited storage.
++ 
