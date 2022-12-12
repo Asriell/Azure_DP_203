@@ -189,8 +189,41 @@
 
 + **Temps réel** : 
   + Input type = Stream, Function = Geospatial
+
 + Optimisation de perf : paralleliser Input et Output
+
 + Tumbling windows are a series of fixed-sized, non-overlapping and contiguous time intervals.
+
 + Azure Data Factory pipelines can execute SSIS packages. In Azure, the following services and tools will meet the core requirements for pipeline orchestration, control flow, and data movement: Azure Data Factory, Oozie on HDInsight, and SQL Server Integration Services (SSIS).
+
 + Data Lake Storage Gen1 provides unlimited storage.
-+ 
+
++ PolyBase can't load rows that have more than 1,000,000 bytes of data. When you put data into the text files in Azure Blob storage or Azure Data Lake Store, they must have fewer than 1,000,000 bytes of data. This byte limitation is true regardless of the table schema.
+
++ A materialized view is a database object that contains the results of a query. A materialized view is not simply a window on the base table. It is actually a separate object holding data in itself. So query data against a materialized view with different filters should be quick.
+
++ Each Spark Parquet or CSV external table located in Azure Storage is represented with an external table in a dbo schema that corresponds to a serverless SQL pool database.
+
++ ![image-20221212224428501](Images/capture.png)
+
++ ![image-20221212224428501](Images/capture2.png)
+
++ Avro is framework developed within [Apache’s Hadoop project](https://www.adaltas.com/en/tag/apache-hadoop/). It is a row-based storage format which is widely used as a serialization process. AVRO stores its schema in JSON format making it easy to read and interpret by any program. The data itself is stored in binary format by doing it compact and efficient. A key feature of AVRO is related to the fact that it can easily handle schema evolution. It attach metadata into their data in each record.
+
+  + Advantage
+    - Avro is a data serialization system.
+    - It is splittable (AVRO has a sync marker to separate the block) and compressible.
+    - Avro is good file format for data exchange. It has a data storage which is very compact, fast and eficient for analytics.
+    - It highly supports schema evolution (at different time and independently).
+    - It supports batch and is very relevant for streaming.
+    - Avro schemas defined in JSON, easy to read and parse.
+    - The data is always accompanied by schema, which allow full processing on the data.
+  + Drawback
+    - Its data is not readable by human.
+    - Not integrated to every languages.
+  + Ecosystems
+    - Widely used in many application (Kafka, Spark, … ).
+    - Avro is a remote procedure call ([RPC](https://en.wikipedia.org/wiki/Remote_procedure_call)).
+
++ ![image-20221212224428501](Images/capture3.png)
+
