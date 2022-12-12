@@ -1,3 +1,13 @@
 # Azure_DP_203
 
-Test
++ **Azure Stream Analytics** 
+  + Temps réel 
+  + Synthaxe : 
+    + ```
+    SELECT 
+    *
+INTO
+    Output
+FROM
+    InputStream
+    ```sql 
