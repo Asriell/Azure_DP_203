@@ -3,4 +3,5 @@
 + **Azure Stream Analytics** 
   + Temps réel 
   + Synthaxe : 
-    + ```SELECT * INTO Output FROM InputStream ``` sql 
+    + ```SELECT * INTO Output FROM InputStream```
+    + 
