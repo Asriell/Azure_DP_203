@@ -229,4 +229,37 @@
 + ![image-20221212224428501](Images/Capture3.png)
 
 + For **optimal compression and performance** of clustered columnstore tables, a minimum of 1 million rows per distribution and partition is needed. Before partitions are created, dedicated SQL pool already divides each table into 60 distributed databases.
-+ 
++ **Hot, cool, and archive access tiers for blob data**
+  + **Hot tier** - An online tier optimized for storing data that is accessed or modified frequently. The hot tier has the highest storage costs, but the lowest access costs.
+  + **Cool tier** - An online tier optimized for storing data that is infrequently accessed or modified. Data in the cool tier should be stored for a minimum of 30 days. The cool tier has lower storage costs and higher access costs compared to the hot tier.
+  + **Archive tier** - An offline tier optimized for storing data that is rarely accessed, and that has flexible latency requirements, on the order of hours. Data in the archive tier should be stored for a minimum of 180 days.
+  + Data must remain in the **Archive tier** for at least **180 days** or be subject to an early deletion charge. For example, if a blob is moved to the Archive tier and then deleted or moved to the Hot tier after 45 days, you'll be charged an early deletion fee equivalent to 135 (180 minus 45) days of storing that blob in the Archive tier. A blob in the Cool tier in a general-purpose v2 accounts is subject to an early deletion penalty if it is deleted or moved to a different tier before **30 days** has elapsed. This charge is prorated. For example, if a blob is moved to the Cool tier and then deleted after 21 days, you'll be charged an early deletion fee equivalent to 9 (30 minus 21) days of storing that blob in the Cool tier.
+
++ Blob storage lifecycle management offers a rule-based policy that you can use to transition your data to the desired access tier when your specified conditions are met. You can also use lifecycle management to expire data at the end of its life.
++ A **natural key / business key** differs from a [surrogate key](https://en.wikipedia.org/wiki/Surrogate_key) which has no meaning outside the database itself and is not based on real-world observation or intended as a statement about the reality being modelled. A natural key therefore provides a certain data quality guarantee whereas a surrogate does not. It is common for elements of data to have several keys, any number of which may be natural or surrogate.
++ **Formes normales**
+  + **1NF** : valeurs atomiques 
+  + ![image-20221212233828694](Images/1nf.png)
+  + **2NF** : Pas de dépendance entre les colonnes --> Tables séparées
+  + ![image-20221212234014430](Images/2nf.png)
+  +  **3NF** : On vire tous les attributs dépendants 
+  + ![image-20221212234248269](Images/3nf.png)
+
++ **Each partition should have around 1 millions records**. Dedication SQL pools already have 60 partitions.
+  + We have the formula: Records/(Partitions*60)= 1 million
+    Partitions= Records/(1 million * 60)
+    Partitions= 2.4 x 1,000,000,000/(1,000,000 * 60) = 40
+
++ **build a solution to ensure that users can query specific files in an Azure Data Lake Storage Gen2 account from an Azure Synapse Analytics serverless SQL pool.**
+  + You can create external tables in Synapse SQL pools via the following steps:
+    + CREATE EXTERNAL DATA SOURCE to reference an external Azure storage and specify the credential that should be used to access the storage.
+    + CREATE EXTERNAL FILE FORMAT to describe format of CSV or Parquet files.
+    + CREATE EXTERNAL TABLE on top of the files placed on the data source with the same file format.
++ **Dimension tables** contain attribute data that might change but usually changes infrequently. For example, a customer's name and address are stored in a dimension table and updated only when the customer's profile changes. To minimize the size of a large fact table, the customer's name and address don't need to be in every row of a fact table. Instead, the fact table and the dimension table can share a customer ID. A query can join the two tables to associate a customer's profile and transactions.
++ **Fact tables** contain quantitative data that are commonly generated in a transactional system, and then loaded into the dedicated SQL pool. For example, a retail business generates sales transactions every day, and then loads the data into a dedicated SQL pool fact table for analysis.
+  Reference:
++ **implementing a pattern that batch loads the files daily into a dedicated SQL pool in Azure Synapse Analytics by using PolyBase.**
+  +  Create an **external data source** that uses the abfs location : Create External Data Source to reference Azure Data Lake Store Gen 1 or 2
+  + Create an **external file format** and set the *First_Row* option. : Create External File Format.
+  + Use **CREATE EXTERNAL TABLE AS SELECT** (CETAS) and configure the reject options to specify reject values or percentages : To use PolyBase, you must create external tables to reference your external data. Use reject options.
+    + REJECT options don't apply at the time this CREATE EXTERNAL TABLE AS SELECT statement is run. Instead, they're specified here so that the database can use them at a later time when it imports data from the external table. Later, when the CREATE TABLE AS SELECT statement selects data from the external table, the database will use the reject options to determine the number or percentage of rows that can fail to import before it stops the import.
