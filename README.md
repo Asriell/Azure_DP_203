@@ -13,7 +13,7 @@
   + mettre les données à supprimer dedans
   + drop la table
 
-+ ![image-20221211202806769](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221211202806769.png)
++ ![image-20221211202806769](Images/image-20221211202806769.png)
 
   + Serverless : F1 et F4 
   + Sinon, F1 F2 F3 et F4 (si pas hidden). To change the default and only read from the root folder, set the attribute `<polybase.recursive.traversal>` to 'false' in the core-site.xml configuration file. This file is located under `<SqlBinRoot>\PolyBase\Hadoop\Conf` with SqlBinRoot the `bin` root of SQL Server. For example, `C:\Program Files\Microsoft SQL Server\MSSQL13.XD14\MSSQL\Binn`.
@@ -32,7 +32,7 @@
     + Staging - Use round-robin for the staging table. The load with CTAS is fast. Once the data is in the staging table, use INSERT...SELECT to move the data to production tables.
   + Voir : https://docs.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/sql-data-warehouse-tables-overview#common-distribution-methods-for-tables
 
-+ ![image-20221211205327125](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221211205327125.png)
++ ![image-20221211205327125](Images/image-20221211205327125.png)
 
   + **Hot tier** - An online tier optimized for storing data that is accessed or modified frequently. The hot tier has the highest storage costs, but the lowest access costs.
   + **Cool tier** - An online tier optimized for storing data that is infrequently accessed or modified. Data in the cool tier should be stored for a minimum of 30 days. The cool tier has lower storage costs and higher access costs compared to the hot tier.
@@ -89,20 +89,20 @@
 
   + **Locally redundant storage (LRS)** : 
     + copies your data synchronously three times within a single physical location in the primary region. 
-    + ![image-20221212022934442](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221212022934442.png)
+    + ![image-20221212022934442](Images/image-20221212022934442.png)
     + 
   + **Zone-redundant storage (ZRS)** : 
     + copies your data synchronously across three Azure availability zones in the primary region. For applications requiring high availability, Microsoft recommends using ZRS in the primary region, and also replicating to a secondary region.
-    + ![image-20221212023007385](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221212023007385.png)
+    + ![image-20221212023007385](Images/image-20221212023007385.png)
   + **Geo-redundant storage** : 
     + Geo-redundant storage (GRS) copies your data synchronously three times within a single physical location in the primary region using LRS. It then copies your data asynchronously to a single physical location in a secondary region that is hundreds of miles away from the primary region.
-    + ![image-20221212023204339](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221212023204339.png)
+    + ![image-20221212023204339](Images/image-20221212023204339.png)
   + **Geo-zone-redundant storage** : 
     + Geo-zone-redundant storage (GZRS) combines the high availability provided by redundancy across availability zones with protection from regional outages provided by geo-replication. Data in a GZRS storage account is copied across three [Azure availability zones](https://learn.microsoft.com/en-us/azure/availability-zones/az-overview) in the primary region and is also replicated to a secondary geographic region for protection from regional disasters.
-    + ![image-20221212023355467](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221212023355467.png)
+    + ![image-20221212023355467](Images/image-20221212023355467.png)
   + **Summary of redundancy options** : 
-    + ![image-20221212023439797](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221212023439797.png)
-    + ![image-20221212023600412](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221212023600412.png)
+    + ![image-20221212023439797](Images/image-20221212023439797.png)
+    + ![image-20221212023600412](Images/image-20221212023600412.png)
   + **Read Access** : 
     + If your applications require high availability, then you can configure your storage account for read access to the secondary region. When you enable read access to the secondary region, then your data is always available to be read from the secondary, including in a situation where the primary region becomes unavailable. Read-access geo-redundant storage (RA-GRS) or read-access geo-zone-redundant storage (RA-GZRS) configurations permit read access to the secondary region.
 
@@ -121,7 +121,7 @@
       + The table size on disk is more than 2 GB.
       + The table has frequent insert, update, and delete operations.
 
-    + ![image-20221212025537951](C:\Users\Kevin\AppData\Roaming\Typora\typora-user-images\image-20221212025537951.png)
+    + ![image-20221212025537951](Images/image-20221212025537951.png)
 
     + Ex. : 
 
@@ -186,10 +186,6 @@
     + A heap table can be especially useful for loading transient data, such as a staging table, which is transformed into a final table.
     + When you are temporarily landing data in dedicated SQL pool, you may find that using a heap table makes the overall process faster. This is because loads to heaps are faster than to index tables and in some cases the subsequent read can be done from cache. If you are loading data only to stage it before running more transformations, loading the table to heap table is much faster than loading the data to a clustered columnstore table. In addition, loading data to a [temporary table](https://learn.microsoft.com/en-us/azure/synapse-analytics/sql-data-warehouse/sql-data-warehouse-tables-temporary) loads faster than loading a table to permanent storage. After data loading, you can create indexes in the table for faster query performance.
     + Cluster columnstore tables begin to achieve optimal compression once there is more than 60 million rows. For small lookup tables, less than 60 million rows, consider using HEAP or clustered index for faster query performance.
-
-
-
-
 
 + **Temps réel** : 
   + Input type = Stream, Function = Geospatial
