@@ -204,9 +204,9 @@
 
 + Each **Spark Parquet or CSV external** table located in Azure Storage is represented with an external table in a dbo schema that corresponds to a serverless SQL pool database.
 
-+ ![image-20221212224428501](Images/capture.png)
++ ![image-20221212224428501](Images/Capture.png)
 
-+ ![image-20221212224428501](Images/capture2.png)
++ ![image-20221212224428501](Images/Capture2.png)
 
 + **Avro** : 
 
@@ -226,7 +226,7 @@
     - Widely used in many application (Kafka, Spark, … ).
     - Avro is a remote procedure call ([RPC](https://en.wikipedia.org/wiki/Remote_procedure_call)).
 
-+ ![image-20221212224428501](Images/capture3.png)
++ ![image-20221212224428501](Images/Capture3.png)
 
 + For **optimal compression and performance** of clustered columnstore tables, a minimum of 1 million rows per distribution and partition is needed. Before partitions are created, dedicated SQL pool already divides each table into 60 distributed databases.
 + 
