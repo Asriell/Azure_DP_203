@@ -302,3 +302,27 @@
 
   + In general, the best practice is to start with 6 SUs for queries that don't use PARTITION BY.
   + Here there are 10 partitions, so 6x10 = 60 SUs is good.
++ **Azure Spark SQL Type 2 SCD** : 
+  + The Delta provides the ability to infer the schema for data input which further reduces the effort required in managing the schema changes. The Slowly Changing
+Data(SCD) Type 2 records all the changes made to each key in the dimensional table. These operations require updating the existing rows to mark the previous values of the keys as old and then inserting new rows as the latest values. Also, Given a source table with the updates and the target table with dimensional data,
+SCD Type 2 can be expressed with the merge.
+
+```python 
+customersTable
+  .as("customers")
+  .merge(
+    stagedUpdates.as("staged_updates"),
+    "customers.customerId = mergeKey")
+  .whenMatched("customers.current = true AND customers.address <> staged_updates.address")
+  .updateExpr(Map(                    
+    "current" -> "false",
+    "endDate" -> "staged_updates.effectiveDate"))
+  .whenNotMatched()
+  .insertExpr(Map(
+    "customerid" -> "staged_updates.customerId",
+    "address" -> "staged_updates.address",
+    "current" -> "true",
+    "effectiveDate" -> "staged_updates.effectiveDate",  
+    "endDate" -> "null"))
+  .execute()
+```
