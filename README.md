@@ -326,3 +326,16 @@ customersTable
     "endDate" -> "null"))
   .execute()
 ```
+
++ PolyBase is a technology that accesses external data stored in Azure Blob storage or Azure Data Lake Store via the T-SQL language.
++ Extract, Load, and Transform (ELT)
++ Extract, Load, and Transform (ELT) is a process by which data is extracted from a source system, loaded into a data warehouse, and then transformed.
++ The basic steps for implementing a PolyBase ELT for dedicated SQL pool are:
+  + Extract the source data into text files.
+  + Land the data into Azure Blob storage or Azure Data Lake Store.
+  + Prepare the data for loading.
+  + Load the data into dedicated SQL pool staging tables using PolyBase.
+  + Transform the data.
+  + Insert the data into production tables.
++ Polybase loads rows that are smaller than 1 MB.
++ 
