@@ -297,3 +297,8 @@
 
 + You can use Databricks Pools to Speed up your Data Pipelines and Scale Clusters Quickly.
   Databricks Pools, a managed cache of virtual machine instances that enables clusters to start and scale 4 times faster.
+
++ Streaming Units (SUs) represents the computing resources that are allocated to execute a Stream Analytics job. The higher the number of SUs, the more CPU and memory resources are allocated for your job.
+
+  + In general, the best practice is to start with 6 SUs for queries that don't use PARTITION BY.
+  + Here there are 10 partitions, so 6x10 = 60 SUs is good.
