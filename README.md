@@ -263,3 +263,37 @@
   + Create an **external file format** and set the *First_Row* option. : Create External File Format.
   + Use **CREATE EXTERNAL TABLE AS SELECT** (CETAS) and configure the reject options to specify reject values or percentages : To use PolyBase, you must create external tables to reference your external data. Use reject options.
     + REJECT options don't apply at the time this CREATE EXTERNAL TABLE AS SELECT statement is run. Instead, they're specified here so that the database can use them at a later time when it imports data from the external table. Later, when the CREATE TABLE AS SELECT statement selects data from the external table, the database will use the reject options to determine the number or percentage of rows that can fail to import before it stops the import.
+
++ **Pyspark**
+
+  + **explode** 
+
+    + ```python
+      explode(expr)
+      ```
+
+    + **Arguments** : `expr`: An ARRAY or MAP expression.
+
+    + **Returns** : A set of rows composed of the other expressions in the select list and either the elements of the array or the keys and values of the map. If `expr` is NULL no rows are produced.
+
+    + `explode` can only be placed in the select list or a LATERAL VIEW. When placing the function in the `SELECT` list there must be no other generator function in the same `SELECT` list.
+
+    + The column produced by explode of an array is named `col` by default, but can be aliased. The columns for a map are by default called `key` and `value`. They can also be aliased using an alias tuple such as `AS (myKey, myValue)`.
+
+    + **Exemples** : 
+
+    + ```sql
+      > SELECT explode(array(10, 20)) AS elem, 'Spark';
+       10 Spark
+       20 Spark
+      
+      > SELECT explode(map(1, 'a', 2, 'b')) AS (num, val), 'Spark';
+       1   a   Spark
+       2   b   Spark
+      
+      > SELECT explode(array(1, 2)), explode(array(3, 4));
+        Error: unsupported generator
+      ```
+
++ You can use Databricks Pools to Speed up your Data Pipelines and Scale Clusters Quickly.
+  Databricks Pools, a managed cache of virtual machine instances that enables clusters to start and scale 4 times faster.
