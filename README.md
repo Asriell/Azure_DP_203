@@ -204,9 +204,9 @@
 
 + Each **Spark Parquet or CSV external** table located in Azure Storage is represented with an external table in a dbo schema that corresponds to a serverless SQL pool database.
 
-+ ![image-20221212224428501](Images/Capture.png)
++ ![image-20221212224428501](Images/Capture.PNG)
 
-+ ![image-20221212224428501](Images/Capture2.png)
++ ![image-20221212224428501](Images/Capture2.PNG)
 
 + **Avro** : 
 
@@ -226,7 +226,7 @@
     - Widely used in many application (Kafka, Spark, … ).
     - Avro is a remote procedure call ([RPC](https://en.wikipedia.org/wiki/Remote_procedure_call)).
 
-+ ![image-20221212224428501](Images/Capture3.png)
++ ![image-20221212224428501](Images/Capture3.PNG)
 
 + For **optimal compression and performance** of clustered columnstore tables, a minimum of 1 million rows per distribution and partition is needed. Before partitions are created, dedicated SQL pool already divides each table into 60 distributed databases.
 + **Hot, cool, and archive access tiers for blob data**
@@ -239,11 +239,11 @@
 + A **natural key / business key** differs from a [surrogate key](https://en.wikipedia.org/wiki/Surrogate_key) which has no meaning outside the database itself and is not based on real-world observation or intended as a statement about the reality being modelled. A natural key therefore provides a certain data quality guarantee whereas a surrogate does not. It is common for elements of data to have several keys, any number of which may be natural or surrogate.
 + **Formes normales**
   + **1NF** : valeurs atomiques 
-  + ![image-20221212233828694](Images/1nf.png)
+  + ![image-20221212233828694](Images/1nf.PNG)
   + **2NF** : Pas de dépendance entre les colonnes --> Tables séparées
-  + ![image-20221212234014430](Images/2nf.png)
+  + ![image-20221212234014430](Images/2nf.PNG)
   +  **3NF** : On vire tous les attributs dépendants 
-  + ![image-20221212234248269](Images/3nf.png)
+  + ![image-20221212234248269](Images/3nf.PNG)
 
 + **Each partition should have around 1 millions records**. Dedication SQL pools already have 60 partitions.
   + We have the formula: Records/(Partitions*60)= 1 million
