@@ -338,4 +338,25 @@ customersTable
   + Transform the data.
   + Insert the data into production tables.
 + Polybase loads rows that are smaller than 1 MB.
-+ 
++ **Tumbling windows** 
+  + Tumbling windows are a series of fixed-sized, non-overlapping and contiguous time intervals. The following diagram illustrates a stream with a series of events and how they are mapped into 10-second tumbling windows.
+  + ![image-20221212234248269](Images/Tumbling_windows.PNG)
+```sql
+{TUMBLINGWINDOW | TUMBLING} ( timeunit  , windowsize, [offsetsize] )  
+{TUMBLINGWINDOW | TUMBLING} ( Duration( timeunit  , windowsize ), [Offset(timeunit  , offsetsize)] )
+```
+
+Exemple : 
+
+```sql
+SELECT System.Timestamp() AS WindowEnd, TollId, COUNT(*)  
+FROM Input TIMESTAMP BY EntryTime  
+GROUP BY TollId, TumblingWindow(Duration(hour, 1), Offset(millisecond, -1))
+```
++ **Hopping window**
+  + Unlike tumbling windows, hopping windows model scheduled overlapping windows. A hopping window specification consist of three parameters: the timeunit, the windowsize (how long each window lasts) and the hopsize (by how much each window moves forward relative to the previous one). Additionally, offsetsize may be used as an optional fourth parameter. Note that a tumbling window is simply a hopping window whose ‘hop’ is equal to its ‘size’.
+  + ![image-20221212234248269](Images/Hopping_windows.PNG)
+```sql
+{HOPPINGWINDOW | HOPPING} ( timeunit  , windowsize , hopsize, [offsetsize] )
+{HOPPINGWINDOW | HOPPING} ( Duration( timeunit  , windowsize ) , Hop (timeunit  , windowsize ), [Offset(timeunit  , offsetsize)])
+```
