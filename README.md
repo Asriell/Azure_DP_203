@@ -360,3 +360,6 @@ GROUP BY TollId, TumblingWindow(Duration(hour, 1), Offset(millisecond, -1))
 {HOPPINGWINDOW | HOPPING} ( timeunit  , windowsize , hopsize, [offsetsize] )
 {HOPPINGWINDOW | HOPPING} ( Duration( timeunit  , windowsize ) , Hop (timeunit  , windowsize ), [Offset(timeunit  , offsetsize)])
 ```
++ **Sliding window**
+  + When using a sliding window, the system is asked to logically consider all possible windows of a given length. As the number of such windows would be infinite, Azure Stream Analytics instead outputs events only for those points in time when the content of the window actually changes, in other words when an event entered or exits the window.
+  + ![image-20221212234248269](Images/Sliding_windows.PNG)
