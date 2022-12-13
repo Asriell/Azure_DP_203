@@ -174,6 +174,30 @@
     + A successful partitioning scheme usually has tens to hundreds of partitions, not thousands.
     + When creating partitions on **clustered columnstore** tables, it is important to consider how many rows belong to each partition. For optimal compression and performance of clustered columnstore tables, a minimum of 1 million rows per distribution and partition is needed. 
 
+  + Examples 
+
+    + Creating a RANGE LEFT partition function on an int column
+
+      ```sql
+      CREATE PARTITION FUNCTION myRangePF1 (int)  
+      AS RANGE LEFT FOR VALUES (1, 100, 1000);
+      ```
+
+      ![image-20221213230956112](Images/Left_partition.PNG)
+
+      
+
+    + Creating a RANGE RIGHT partition function on an int column
+
+      ```sql
+      CREATE PARTITION FUNCTION myRangePF2 (int)  
+      AS RANGE RIGHT FOR VALUES (1, 100, 1000);
+      ```
+
+      ![image-20221213231227928](Images/Right_partition.png)
+
+      
+
 + **Index**
 
   + **Clustered columnstore indexes**
@@ -229,6 +253,7 @@
 + ![image-20221212224428501](Images/Capture3.PNG)
 
 + For **optimal compression and performance** of clustered columnstore tables, a minimum of 1 million rows per distribution and partition is needed. Before partitions are created, dedicated SQL pool already divides each table into 60 distributed databases.
+
 + **Hot, cool, and archive access tiers for blob data**
   + **Hot tier** - An online tier optimized for storing data that is accessed or modified frequently. The hot tier has the highest storage costs, but the lowest access costs.
   + **Cool tier** - An online tier optimized for storing data that is infrequently accessed or modified. Data in the cool tier should be stored for a minimum of 30 days. The cool tier has lower storage costs and higher access costs compared to the hot tier.
@@ -236,7 +261,9 @@
   + Data must remain in the **Archive tier** for at least **180 days** or be subject to an early deletion charge. For example, if a blob is moved to the Archive tier and then deleted or moved to the Hot tier after 45 days, you'll be charged an early deletion fee equivalent to 135 (180 minus 45) days of storing that blob in the Archive tier. A blob in the Cool tier in a general-purpose v2 accounts is subject to an early deletion penalty if it is deleted or moved to a different tier before **30 days** has elapsed. This charge is prorated. For example, if a blob is moved to the Cool tier and then deleted after 21 days, you'll be charged an early deletion fee equivalent to 9 (30 minus 21) days of storing that blob in the Cool tier.
 
 + Blob storage lifecycle management offers a rule-based policy that you can use to transition your data to the desired access tier when your specified conditions are met. You can also use lifecycle management to expire data at the end of its life.
+
 + A **natural key / business key** differs from a [surrogate key](https://en.wikipedia.org/wiki/Surrogate_key) which has no meaning outside the database itself and is not based on real-world observation or intended as a statement about the reality being modelled. A natural key therefore provides a certain data quality guarantee whereas a surrogate does not. It is common for elements of data to have several keys, any number of which may be natural or surrogate.
+
 + **Formes normales**
   + **1NF** : valeurs atomiques 
   + ![image-20221212233828694](Images/1nf.PNG)
@@ -255,9 +282,12 @@
     + CREATE EXTERNAL DATA SOURCE to reference an external Azure storage and specify the credential that should be used to access the storage.
     + CREATE EXTERNAL FILE FORMAT to describe format of CSV or Parquet files.
     + CREATE EXTERNAL TABLE on top of the files placed on the data source with the same file format.
+
 + **Dimension tables** contain attribute data that might change but usually changes infrequently. For example, a customer's name and address are stored in a dimension table and updated only when the customer's profile changes. To minimize the size of a large fact table, the customer's name and address don't need to be in every row of a fact table. Instead, the fact table and the dimension table can share a customer ID. A query can join the two tables to associate a customer's profile and transactions.
+
 + **Fact tables** contain quantitative data that are commonly generated in a transactional system, and then loaded into the dedicated SQL pool. For example, a retail business generates sales transactions every day, and then loads the data into a dedicated SQL pool fact table for analysis.
   Reference:
+
 + **implementing a pattern that batch loads the files daily into a dedicated SQL pool in Azure Synapse Analytics by using PolyBase.**
   +  Create an **external data source** that uses the abfs location : Create External Data Source to reference Azure Data Lake Store Gen 1 or 2
   + Create an **external file format** and set the *First_Row* option. : Create External File Format.
@@ -302,10 +332,11 @@
 
   + In general, the best practice is to start with 6 SUs for queries that don't use PARTITION BY.
   + Here there are 10 partitions, so 6x10 = 60 SUs is good.
+
 + **Azure Spark SQL Type 2 SCD** : 
   + The Delta provides the ability to infer the schema for data input which further reduces the effort required in managing the schema changes. The Slowly Changing
-Data(SCD) Type 2 records all the changes made to each key in the dimensional table. These operations require updating the existing rows to mark the previous values of the keys as old and then inserting new rows as the latest values. Also, Given a source table with the updates and the target table with dimensional data,
-SCD Type 2 can be expressed with the merge.
+  Data(SCD) Type 2 records all the changes made to each key in the dimensional table. These operations require updating the existing rows to mark the previous values of the keys as old and then inserting new rows as the latest values. Also, Given a source table with the updates and the target table with dimensional data,
+  SCD Type 2 can be expressed with the merge.
 
 ```python 
 customersTable
@@ -363,3 +394,58 @@ GROUP BY TollId, TumblingWindow(Duration(hour, 1), Offset(millisecond, -1))
 + **Sliding window**
   + When using a sliding window, the system is asked to logically consider all possible windows of a given length. As the number of such windows would be infinite, Azure Stream Analytics instead outputs events only for those points in time when the content of the window actually changes, in other words when an event entered or exits the window.
   + ![image-20221212234248269](Images/Sliding_windows.PNG)
+
++ "spark.databricks.cluster.profile": "serverless" means that the cluster is a High Concurrency Cluster, which support multi-users.
+
++ Scheduled jobs should run in standard cluster. High Concurrency clusters are intended for multi-users and won’t benefit a cluster running a single job.
+
++ **Azure Event Hubs** : 
+
+  + Azure Event Hubs is a big data streaming platform and event ingestion service. It can receive and process millions of events per second. Data sent to an event hub can be transformed and stored by using any real-time analytics provider or batching/storage adapters.
+  + The following scenarios are some of the scenarios where you can use Event Hubs:
+    - Anomaly detection (fraud/outliers)
+    - Application logging
+    - Analytics pipelines, such as clickstreams
+    - Live dashboards
+    - Archiving data
+    - Transaction processing
+    - User telemetry processing
+    - Device telemetry streaming
+
++ **Conditional splits ADF version script exemple**
+
+  ![image-20221213233405128](Images/Condsplits.PNG)
+
+  ```sql
+  CleanData
+      split(
+          year < 1960,
+  	    year > 1980,
+  	    disjoint: false
+      ) ~> SplitByYear@(moviesBefore1960, moviesAfter1980, AllOtherMovies)
+     
+     
+  -- La syntaxe : 
+  
+  <incomingStream>
+      split(
+          <conditionalExpression1>
+          <conditionalExpression2>
+          ...
+          disjoint: {true | false}
+      ) ~> <splitTx>@(stream1, stream2, ..., <defaultStream>)
+  ```
+
+  + Le disjoint correspond à "Split on" : First matching condition --> disjoint : false ; All matching conditions --> disjoint : true. 
+
++   **Steps copy the data from a JSON file to an Azure Synapse Analytics table by using Azure Databricks, from Azure Data Lake Storage Gen2** : 
+  + Step 1: Mount the Data Lake Storage onto DBFS
+    Begin with creating a file system in the Azure Data Lake Storage Gen2 account.
+    Step 2: Read the file into a data frame.
+    You can load the json files as a data frame in Azure Databricks.
+    Step 3: Perform transformations on the data frame.
+    Step 4: Specify a temporary folder to stage the data
+    Specify a temporary folder to use while moving data between Azure Databricks and Azure Synapse.
+    Step 5: Write the results to a table in Azure Synapse.
+    You upload the transformed data frame into Azure Synapse. You use the Azure Synapse connector for Azure Databricks to directly upload a dataframe as a table in a Azure Synapse.
+
