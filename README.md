@@ -395,6 +395,11 @@ GROUP BY TollId, TumblingWindow(Duration(hour, 1), Offset(millisecond, -1))
   + When using a sliding window, the system is asked to logically consider all possible windows of a given length. As the number of such windows would be infinite, Azure Stream Analytics instead outputs events only for those points in time when the content of the window actually changes, in other words when an event entered or exits the window.
   + ![image-20221212234248269](Images/Sliding_windows.PNG)
 
++ **Session window**
+
+  + [**Session**](https://learn.microsoft.com/en-us/stream-analytics-query/session-window-azure-stream-analytics) window functions group events that arrive at similar times, filtering out periods of time where there is no data. It has three main parameters: timeout, maximum duration, and partitioning key (optional).
+  + ![image-20221212234248269](Images/Session_windows.PNG)
+
 + "spark.databricks.cluster.profile": "serverless" means that the cluster is a High Concurrency Cluster, which support multi-users.
 
 + Scheduled jobs should run in standard cluster. High Concurrency clusters are intended for multi-users and won’t benefit a cluster running a single job.
@@ -487,3 +492,68 @@ GROUP BY TollId, TumblingWindow(Duration(hour, 1), Offset(millisecond, -1))
   - Dispatching the following transform activities against compute resources in on-premises or Azure Virtual Network: HDInsight Hive activity (BYOC-Bring Your Own Cluster), HDInsight Pig activity (BYOC), HDInsight MapReduce activity (BYOC), HDInsight Spark activity (BYOC), HDInsight Streaming activity (BYOC), ML Studio (classic) Batch Execution activity, ML Studio (classic) Update Resource activities, Stored Procedure activity, Data Lake Analytics U-SQL activity, Custom activity (runs on Azure Batch), Lookup activity, and Get Metadata activity.
 
 + To lift and shift existing SSIS workload, you can create an **Azure-SSIS IR** to natively execute SSIS packages.
+
++ **Reference data** (also known as a lookup table) is a finite data set that is static or slowly changing in nature, used to perform a lookup or to augment your data streams. For example, in an IoT scenario, you could store metadata about sensors (which don't change often) in reference data and join it with real time IoT data streams. Azure Stream Analytics loads reference data in memory to achieve low latency stream processing
+
+
+
++ **LAG** (Azure Stream Analytics) : 
+
+  +  The LAG analytic operator allows one to look up a “previous” event in an event stream, within certain constraints. It is very useful for computing the rate of growth of a variable, detecting when a variable crosses a threshold, or when a condition starts or stops being true.
+
+    ```sql
+    LAG(<scalar_expression >, [<offset >], [<default>])  
+         OVER ([PARTITION BY <partition key>] LIMIT DURATION(<unit>, <length>) [WHEN boolean_expression])
+         
+    -- Exemples 
+    
+    SELECT sensorId,  
+           growth = reading -
+                            LAG(reading) OVER (PARTITION BY sensorId LIMIT DURATION(hour, 1))  
+    FROM input
+    
+    SELECT  
+         sensorId,  
+         LAG(reading) OVER (PARTITION BY sensorId LIMIT DURATION(hour, 1) WHEN reading IS NOT NULL)  
+         FROM input
+    ```
+
+    **limit_duration clause** DURATION(<unit>, <length>)
+
+    Specifies how much of the history from the current event must be considered. See DATEDIFF for a detailed description of supported units and their abbreviations. If not enough matching events are found within the DURATION interval, the <default> value is returned.
+
++ Event-driven architecture (EDA) is a common data integration pattern that involves production, detection, consumption, and reaction to events. Data integration scenarios often require Data Factory customers to trigger pipelines based on events happening in storage account, such as the arrival or deletion of a file in Azure
+  Blob Storage account.
+
++ Reference data with Azure Stream Analytics : Azure Blob storage
+
++ Standard clusters are recommended for a single user. Standard can run workloads developed in any language: Python, R, Scala, and SQL.
+  A high concurrency cluster is a managed cloud resource. The key benefits of high concurrency clusters are that they provide Apache Spark-native fine-grained sharing for maximum resource utilization and minimum query latencies.
+
++ **use PolyBase to load data into an enterprise data warehouse in Azure Synapse Analytics.** : Configuration 
+
+  + Create a database master key if one does not already exist, using your own password. This key is used to encrypt the credential secret in next step.
+
++ ```sql
+  CREATE MASTER KEY ENCRYPTION BY PASSWORD = '<password>' ;
+  ```
+
+  + Create a database scoped credential with Azure storage account key as the secret.
+
++ ```sql
+  CREATE DATABASE SCOPED CREDENTIAL AzureStorageCredential
+  WITH
+  IDENTITY = '<my_account>',
+  SECRET = '<azure_storage_account_key>' ;
+  ```
+
+  + Create an external data source with CREDENTIAL option.
+
++ ```sql
+  CREATE EXTERNAL DATA SOURCE MyAzureStorage
+  WITH
+  ( LOCATION = 'wasbs://daily@logs.blob.core.windows.net/' ,
+  CREDENTIAL = AzureStorageCredential ,
+  TYPE = HADOOP
+  ) ;
+  ```
